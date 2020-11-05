@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  comuna: MyString
+  region: MyString
+  lat: 
+  long: 1.5
+  tipo_energia: MyString
+  medio_generacion: MyString
+  potencia_neta_mw: 1.5
+
+two:
+  comuna: MyString
+  region: MyString
+  lat: 
+  long: 1.5
+  tipo_energia: MyString
+  medio_generacion: MyString
+  potencia_neta_mw: 1.5

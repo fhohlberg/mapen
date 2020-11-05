@@ -1,0 +1,7 @@
+{
+  "name": "Grupo52-proyecto",
+  "private": true,
+  "dependencies": {
+    "mapbox-gl": "^1.12.0"
+  }
+}

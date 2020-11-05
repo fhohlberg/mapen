@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=utf-8 />
+  <title>A simple map</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
+  <link href='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.css' rel='stylesheet' />
+  <style>
+    body { position:relative; margin:0; padding:0; height: 800; bottom:100}
+    #map-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    #map {
+      height: 600px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v1.0.0/leaflet.markercluster.js'></script>
+  <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v1.0.0/MarkerCluster.css' rel='stylesheet' />
+  <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v1.0.0/MarkerCluster.Default.css' rel='stylesheet' />
+  <style>
+    #colors {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: #fff;
+        width: 150px;
+        padding:5px;
+    }
+
+    pre.ui-coordinates {
+      position:absolute;
+      bottom:10px;
+      left:10px;
+      padding:5px 10px;
+      background:rgba(0,0,0,0.5);
+      color:#fff;
+      font-size:11px;
+      line-height:18px;
+      border-radius:3px;
+      }
+  </style>
+  <section class="bg-secondary pb0">
+    <div class="container text center">
+      <div class="row">
+        <div class="col-sm-10 col-sm-offset-1 text-center">
+          <div class="">
+          <h3>MAPA COBERTURA ELÉCTRICA</h3>
+            <div class="mb32">
+            <p>En el siguiente mapa se muestra de manera interactiva las distintas zonas en donde existe deficiencia energética, y falta de compañías eléctricas.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-10 col-sm-offset-1">
+      <div id="map-container">
+        <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v1.0.0/leaflet.markercluster.js'></script>
+        <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v1.0.0/MarkerCluster.css' rel='stylesheet' />
+        <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v1.0.0/MarkerCluster.Default.css' rel='stylesheet' />
+
+        <!-- Example data. -->
+        <script src="/mapbox.js/assets/data/realworld.388.js"></script>
+
+        <div id='map' class="text center" height="100%" width="100%" bottom="-200px"></div>
+        <pre id='coordinates' class='ui-coordinates'></pre>
+        <form id='colors'>
+          <div><input type='checkbox' name='filters' onclick='showStations();' value='red' checked> red</div>
+          <div><input type='checkbox' name='filters' onclick='showStations();' value='green' checked> green</div>
+          <div><input type='checkbox' name='filters' onclick='showStations();' value='orange' checked> orange</div>
+          <div><input type='checkbox' name='filters' onclick='showStations();' value='yellow' checked> yellow</div>
+          <div><input type='checkbox' name='filters' onclick='showStations();' value='blue' checked> blue</div>
+        </form>
+        <script>
+          L.mapbox.accessToken = 'pk.eyJ1IjoiZnJhbmhvaGxiZXJnIiwiYSI6ImNraDRkZ21zMzAwOW0yenN6Ymp4bHR2aGQifQ.qI5VsvHPR_akHezVSgUFEA';
+          var map = L.mapbox.map('map')
+              .setView([-30,-70], 3)
+              .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
+
+          var coordinates = document.getElementById('coordinates');
+
+          var marker = L.marker([0, 0], {
+              icon: L.mapbox.marker.icon({
+                'marker-color': '#f86767'
+              }),
+              draggable: true
+          }).addTo(map);
+
+          // every time the marker is dragged, update the coordinates container
+          marker.on('dragend', ondragend);
+
+          // Set the initial marker coordinate on load.
+          ondragend();
+
+          function ondragend() {
+              var m = marker.getLatLng();
+              coordinates.innerHTML = 'Latitude: ' + m.lat + '<br />Longitude: ' + m.lng;
+          }
+          var overlays = L.layerGroup().addTo(map);
+
+          // we create the 'layers' variable outside of the on('ready' callback
+          // so that it can be accessible in the showStations function. Otherwise,
+          // JavaScript scope would prevent you from accessing it.
+          var layers;
+
+          // Since featureLayer is an asynchronous method, we use the `.on('ready'`
+          // call to only use its marker data once we know it is actually loaded.
+          L.mapbox.featureLayer()
+              .loadURL('/mapbox.js/assets/data/stations.geojson')
+              .on('ready', function(e) {
+                  layers = e.target;
+                  showStations();
+              });
+
+          var filters = document.getElementById('colors').filters;
+
+          // There are many ways to filter data. Mapbox.js has the .setFilter method,
+          // but it only applies to L.mapbox.featureLayer layers, and that isn't what
+          // we're creating - we're making marker groups in a MarkerClusterGroup layer.
+          // Thus we distill filtering down to its essential part: an 'if' statement
+          // in a loop.
+          function showStations() {
+              // first collect all of the checked boxes and create an array of strings
+              // like ['green', 'blue']
+              var list = [];
+              for (var i = 0; i < filters.length; i++) {
+                  if (filters[i].checked) list.push(filters[i].value);
+              }
+              // then remove any previously-displayed marker groups
+              overlays.clearLayers();
+              // create a new marker group
+              var clusterGroup = new L.MarkerClusterGroup().addTo(overlays);
+              // and add any markers that fit the filtered criteria to that group.
+              layers.eachLayer(function(layer) {
+                  if (list.indexOf(layer.feature.properties.line) !== -1) {
+                      clusterGroup.addLayer(layer);
+                  }
+              });
+          }
+
+        </script>
+        </br>
+        </br>
+        </br>
+        </br>
+      </div>
+    </div>
+  </section>
+  </div>
+  <div class="clearfix"></div>
+  </div>
+</body>
+
+</html>

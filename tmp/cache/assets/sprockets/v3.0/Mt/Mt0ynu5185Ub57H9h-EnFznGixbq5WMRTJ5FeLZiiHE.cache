@@ -1,0 +1,43 @@
+I"œ(function() {
+  var map;
+
+  $(document).ready(function() {});
+
+  map = L.mapbox.map('map', 'ckh4djvh50qzu19mn99c47p03').setView([45.52086, -122.679523], 14);
+
+  $.ajax({
+    dataType: 'text',
+    url: 'locations/happening_now.json',
+    success: function(data) {
+      var geojson;
+      geojson = $.parseJSON(data);
+      return map.featureLayer.setGeoJSON(geojson);
+    }
+  });
+
+  map.featureLayer.on('layeradd', function(e) {
+    var marker, popupContent, properties;
+    marker = e.layer;
+    properties = marker.feature.properties;
+    popupContent = '<div class="popup">' + '<h3>' + properties.comuna + '</h3>' + '<p>' + properties.address + '</p>' + '</div>';
+    return marker.bindPopup(popupContent, {
+      closeButton: false,
+      minWidth: 320
+    });
+  });
+
+  $('article li').click(function(e) {
+    var current, currentlyClickedName;
+    current = $(this);
+    currentlyClickedName = current.find('h2').text();
+    return map.featureLayer.eachLayer(function(marker) {
+      var id;
+      if (marker.feature.properties.name === currentlyClickedName) {
+        id = layer._leaflet_id;
+        return map._layers[id].openPopup();
+      }
+    });
+  });
+
+}).call(this);
+:ET

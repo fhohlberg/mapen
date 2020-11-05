@@ -1,0 +1,59 @@
+I"ð(function() {
+  var lat_field, lng_field, markersArray, placeMarkerAndPanTo, updateFields;
+
+  jQuery(function() {
+    return window.initMap = function() {};
+  });
+
+  window.initMap = function() {
+    var map;
+    if ($('#map').size() > 0) {
+      return map = new google.maps.Map(document.getElementById('map'), {
+        center: {
+          lat: -34.397,
+          lng: 150.644
+        },
+        zoom: 8
+      });
+    }
+  };
+
+  lat_field = $('#location_latitude');
+
+  lng_field = $('#location_longitude');
+
+  window.initMap = function() {
+    return map.addListener('click', function(e) {
+      return updateFields(e.latLng);
+    });
+  };
+
+  updateFields = function(latLng) {
+    lat_field.val(latLng.lat());
+    return lng_field.val(latLng.lng());
+  };
+
+  markersArray = [];
+
+  window.initMap = function() {
+    return map.addListener('click', function(e) {
+      placeMarkerAndPanTo(e.latLng, map);
+      return updateFields(e.latLng);
+    });
+  };
+
+  placeMarkerAndPanTo = function(latLng, map) {
+    var marker;
+    while (markersArray.length) {
+      markersArray.pop().setMap(null);
+    }
+    marker = new google.maps.Marker({
+      position: latLng,
+      map: map
+    });
+    map.panTo(latLng);
+    return markersArray.push(marker);
+  };
+
+}).call(this);
+:ET

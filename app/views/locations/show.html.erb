@@ -1,0 +1,62 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Comuna:</strong>
+  <%= @location.comuna %>
+</p>
+
+<p>
+  <strong>Region:</strong>
+  <%= @location.region %>
+</p>
+
+<p>
+  <strong>Lat:</strong>
+  <%= @location.latitude %>
+</p>
+
+<p>
+  <strong>Long:</strong>
+  <%= @location.longitude %>
+</p>
+
+<p>
+  <strong>Tipo energia:</strong>
+  <%= @location.tipo_energia %>
+</p>
+
+<p>
+  <strong>Medio generacion:</strong>
+  <%= @location.medio_generacion %>
+</p>
+
+<p>
+  <strong>Potencia neta mw:</strong>
+  <%= @location.potencia_neta_mw %>
+</p>
+
+<header><h1 class="display-4"><%= @location.comuna %></h1></header>
+
+<p>Address: <%= @location.address %></p>
+<p>Coordinates: <%= @location.latitude %> <%= @location.longitude %></p>
+
+<body>
+  <div id="energy_map" class="clearfix">
+    <div class="container text center">
+      <div class="row">
+        <div class="col-sm-10 col-sm-offset-1 text-center">
+          <div class="">
+            <%= image_tag "http://maps.googleapis.com/maps/api/staticmap?center=#{@location.latitude},#{@location.longitude}&markers=#{@location.latitude},#{@location.longitude}&zoom=7&size=640x400&key=AIzaSyA4Ni00te13MNuaxQ6NRoXzUQV0MZA0jis",
+              class: 'img-fluid img-rounded', alt: "#{@location.comuna} on the map"%>
+            </div>
+          </div>
+        </div>
+    </div>
+  </div>
+  
+
+  
+</body>
+
+<%= link_to 'Edit', edit_location_path(@location) %> |
+<%= link_to 'Back', locations_path %>

@@ -1,0 +1,298 @@
+ $primaryColour: #003878;
+$secondaryColour: #0170b3;
+$danger: #f70000;
+$secondaryDanger: #f33;
+$backgroundColour: rgb(42,68,98);
+
+.MovNavigator {
+  position: fixed;
+  z-index: 1000;
+
+  a {
+    text-decoration: none;
+  }
+
+  .knowYourClient {
+    font-size: 14px;
+
+    .clientsWrapper {
+      transition: all 0.2s linear;
+      opacity: 0.7;
+
+      .client {
+        opacity: 0.7;
+        &:hover {
+          opacity: 1;
+          cursor: pointer;
+        }
+      }
+    }
+
+    .showClients {
+      max-height: 100px;
+      opacity: 1;
+    }
+    .dontShowClients {
+      max-height: 0;
+      opacity: 0;
+    }
+  }
+
+  .changeClient {
+    opacity: 0.7;
+    user-select: none;
+    cursor: pointer;
+    font-size: 12px;
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .floatingHook {
+    position: absolute;
+    z-index: 110;
+    left: 5px;
+    top: 10px;
+
+    .applicationName {
+      display: inline-block;
+      font-weight: bold;
+      white-space: nowrap;
+      color: #333;
+      font-size: 14px;
+      padding-left: 10px;
+      position: relative;
+      bottom: 15px;
+    }
+
+    .icon {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      padding: 5px;
+      background-color: $primaryColour;
+      stroke: none;
+      fill: white;
+      transition: background-color 0.4s linear, transform 0.4s linear;
+
+      &.close-icon {
+        transform: rotate(180deg);
+        background-color: $danger;
+        &:hover {
+          background-color: $secondaryDanger;
+        }
+      }
+
+      &:hover {
+        cursor: pointer;
+        background-color: $secondaryColour;
+      }
+    }
+  }
+
+  .menu {
+    box-shadow: 5px 5px 15px #081c33;
+    width: 270px;
+    color: white;
+    overflow-y: auto;
+    left: -285px;
+    position: absolute;
+    transition: left .5s;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    justify-content: space-between;
+    background-color: $backgroundColour;
+    z-index: 100;
+    font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+    font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,PingFang SC,Hiragino Sans GB,Microsoft YaHei,Helvetica Neue,Helvetica,Arial,sans-serif;
+    line-height: 1.5;
+
+    &.open {
+      left: 0;
+    }
+
+    .footer {
+      padding-bottom: 10px;
+
+      .metocean {
+        text-align: center;
+        margin-top: 25px;
+        bottom: 20px;
+        display: block;
+        opacity: 0.7;
+        &:hover {
+          opacity: 1;
+        }
+
+        .metoceanIcon {
+          width: 62px;
+          height: 35px;
+          margin-left: auto;
+          margin-right: auto;
+          position: relative;
+
+          fill: #30374f;
+          fill-opacity: 1;
+          fill-rule: nonzero;
+          stroke: none;
+          background-size: contain;
+
+          svg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            stroke: white;
+            fill: white;
+            fill-opacity: 1;
+          }
+        }
+
+        .metoceanLabel {
+          color: white;
+          margin-top: 5px;
+          font-size: 11px;
+        }
+      }
+
+      .footerItem {
+        width: 100%;
+        display: inline-block;
+        color: white;
+        margin-top: 20px;
+
+        .footerIcon {
+          display: inline-block;
+          width: 20px;
+          height: 20px;
+          fill: white;
+          svg {
+            width: 100%;
+            height: 100%;
+          }
+        }
+        .footerLabel {
+          margin-left: 20px;
+          opacity: 0.7;
+          &:hover {
+            opacity: 1;
+          }
+          font-size: 14px;
+          position: relative;
+          bottom: 4px;
+          display: inline-block;
+        }
+      }
+    }
+
+    .appItem {
+      width: 100%;
+      display: block;
+      margin-bottom: 1px;
+      background: rgb(20, 50, 84);
+      color: white;
+
+      &:hover {
+        background-color: rgb(13, 40, 70);
+        cursor: pointer;
+      }
+
+      .appIcon {
+        width: 48px;
+        height: 48px;
+        display: inline-block;
+        fill: white;
+
+        svg {
+          width: 100%;
+          height: 100%;
+        }
+      }
+
+      .appLabel {
+        display: inline-block;
+        position: relative;
+        left: 7px;
+        font-size: 14px;
+        bottom: 18px;
+      }
+    }
+
+    .profile {
+      position: relative;
+      color: white;
+      fill: white;
+      text-align: center;
+      padding-top: 55px;
+      font-size: 10px;
+      margin-bottom: 25px;
+
+      .profile-action {
+        text-transform: uppercase;
+      }
+
+      .settings {
+        width: 75px;
+        text-align: center;
+        display: inline-block;
+        position: absolute;
+        top: 80px;
+        left: 5px;
+        color: white;
+        opacity: 0.7;
+        fill: white;
+        &:hover {
+          opacity: 1;
+        }
+        svg {
+          width: 20px;
+          height: 20px;
+        }
+      }
+
+      .profilePic {
+        display: inline-block;
+        width: 86px;
+        height: 86px;
+        background-color: #AEB8C3;
+        border-radius: 50%;
+
+        svg {
+          border-radius: 50%;
+          margin-top: 6px;
+          width: 80px;
+          height: 80px;
+        }
+      }
+
+      .username {
+        font-size: 17px;
+      }
+
+      .login {
+        font-size: 12;
+      }
+
+      .signOut {
+        color: white;
+        width: 75px;
+        display: inline-block;
+        position: absolute;
+        opacity: 0.7;
+        top: 80px;
+        right: 5px;
+        &:hover {
+          opacity: 1;
+          cursor: pointer;
+        }
+        svg {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+  }
+}
