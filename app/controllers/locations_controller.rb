@@ -9,7 +9,7 @@ class LocationsController < ApplicationController
     @geojson = Array.new
 
     @locations.each do |location|
-      @geojson << {
+      info = {
         type: 'Feature',
         geometry: {
           type: 'Point',
@@ -18,15 +18,38 @@ class LocationsController < ApplicationController
         properties: {
           name: location.comuna,
           address: location.address,
+          potencia_neta_mw: location.potencia_neta_mw,
+          tipo_energia: location.tipo_energia,
           :'marker-color' => '#00607d',
           :'marker-symbol' => 'circle',
           :'marker-size' => 'medium'
         }
       }
+      if location.tipo_energia == "Solar"
+        info[:properties]['marker-color'] = '#fff947'
+      elsif location.tipo_energia == "Petróleo Diesel"
+        info[:properties]['marker-color'] = '#24291b'
+      elsif location.tipo_energia == "Eólica"
+        info[:properties]['marker-color'] = '#b1ff87'
+      elsif location.tipo_energia == "Hidráulica Pasada"
+        info[:properties]['marker-color'] = '#104c7a'
+      elsif location.tipo_energia == "Mini Hidráulica Pasada"
+        info[:properties]['marker-color'] = '#104c7a'
+      elsif location.tipo_energia == "Biogas"
+        info[:properties]['marker-color'] = '#73777a'
+      elsif location.tipo_energia == "Biomasa"
+        info[:properties]['marker-color'] = '#cfbb82'
+      elsif location.tipo_energia == "Biomasa-Petróleo N°6"
+        info[:properties]['marker-color'] = '#a09dd4'
+      elsif location.tipo_energia == "Geotérmica"
+        info[:properties]['marker-color'] = '#e8af10'
+      end
+      @geojson << info
     end
     respond_to do |format|
       format.html
       format.json { render json: @geojson }  # respond with the created JSON object
+      format.js
     end
   end
 
@@ -93,8 +116,7 @@ class LocationsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def location_params
-      params.require(:location).permit(:comuna, :region, :lat, :long, :tipo_energia, :medio_generacion, :potencia_neta_mw)
+      params.require(:location).permit(:comuna, :region, :latitude, :longitude, :tipo_energia, :medio_generacion, :potencia_neta_mw)
     end
 
 end
-

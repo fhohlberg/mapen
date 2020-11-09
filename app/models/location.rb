@@ -3,7 +3,7 @@ class Location < ApplicationRecord
   after_validation :geocode
 
   def address
-    [:comuna, :region, "Chile"].compact.join(', ')
+    [comuna, region, "Chile"].compact.join(', ')
   end
 
   def coordinates

@@ -36,7 +36,7 @@
 
     pre.ui-coordinates {
       position:absolute;
-      bottom:10px;
+      bottom:-20px;
       left:10px;
       padding:5px 10px;
       background:rgba(0,0,0,0.5);
@@ -45,15 +45,20 @@
       line-height:18px;
       border-radius:3px;
       }
+      .info div {
+        background:#fff;
+        padding:10px;
+        border-radius:3px;
+        }
   </style>
   <section class="bg-secondary pb0">
     <div class="container text center">
       <div class="row">
         <div class="col-sm-10 col-sm-offset-1 text-center">
           <div class="">
-          <h3>MAPA COBERTURA ELÉCTRICA</h3>
+          <h3>EXPLORADOR MAPA</h3>
             <div class="mb32">
-            <p>En el siguiente mapa se muestra de manera interactiva las distintas zonas en donde existe deficiencia energética, y falta de compañías eléctricas.</p>
+            <p>En el siguiente mapa se muestran las distintas centrales de generación energética del país y los parámetros oceánicos necesarios para encontrar potencial energético por latitud y longitud.</p>
             </div>
           </div>
         </div>
@@ -71,26 +76,67 @@
         <div id='map' class="text center" height="100%" width="100%" bottom="-200px"></div>
         <pre id='coordinates' class='ui-coordinates'></pre>
         <form id='colors'>
-          <div><input type='checkbox' name='filters' onclick='showStations();' value='red' checked> red</div>
-          <div><input type='checkbox' name='filters' onclick='showStations();' value='green' checked> green</div>
-          <div><input type='checkbox' name='filters' onclick='showStations();' value='orange' checked> orange</div>
-          <div><input type='checkbox' name='filters' onclick='showStations();' value='yellow' checked> yellow</div>
-          <div><input type='checkbox' name='filters' onclick='showStations();' value='blue' checked> blue</div>
+          <div><input type='checkbox' name='filters' onclick='showStations();' value='Todas'>Todas</div>
+          <div><input type='checkbox' name='filters' onclick='showStations();' value='Solar'>Solar</div>
+          <div><input type='checkbox' name='filters' onclick='showStations();' value='Petróleo Diesel'>Petróleo Diesel</div>
+          <div><input type='checkbox' name='filters' onclick='showStations();' value='Eólica'> Eólica</div>
+          <div><input type='checkbox' name='filters' onclick='showStations();' value='Hidráulica Pasada'> Hidráulica Pasada</div>
+          <div><input type='checkbox' name='filters' onclick='showStations();' value='Mini Hidráulica Pasada'> Mini Hidráulica Pasada</div>
+          <div><input type='checkbox' name='filters' onclick='showStations();' value='Biogas'>Biogas</div>
+          <div><input type='checkbox' name='filters' onclick='showStations();' value='Biomasa'>Biomasa</div>
+          <div><input type='checkbox' name='filters' onclick='showStations();' value='Biomasa-Petróleo N°6'>Biomasa-Petróleo N°6</div>
+          <div><input type='checkbox' name='filters' onclick='showStations();' value='Geotérmica'>Geotérmica</div>
         </form>
-        <script>
+
+
+        <div id='info' class='info'></div>
+
+        <script type="text/javascript" charset="utf-8">
           L.mapbox.accessToken = 'pk.eyJ1IjoiZnJhbmhvaGxiZXJnIiwiYSI6ImNraDRkZ21zMzAwOW0yenN6Ymp4bHR2aGQifQ.qI5VsvHPR_akHezVSgUFEA';
           var map = L.mapbox.map('map')
-              .setView([-30,-70], 3)
+              .setView([-30,-70], 5)
               .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
+
+
 
           var coordinates = document.getElementById('coordinates');
 
-          var marker = L.marker([0, 0], {
+          var marker = L.marker([-33.4, -75], {
               icon: L.mapbox.marker.icon({
                 'marker-color': '#f86767'
               }),
               draggable: true
           }).addTo(map);
+
+          var geojson = <%= @geojson.to_json.html_safe %>
+
+          var myLayer = L.mapbox.featureLayer().addTo(map);
+
+          myLayer.setGeoJSON(geojson);
+
+          myLayer.on('click',function(e) {
+              // Force the popup closed.
+              e.layer.closePopup();
+
+              var feature = e.layer.feature;
+              var content = '<div><strong>' + feature.properties.address + '</strong>' +
+                            '<p>Tipo de enrgía: ' + feature.properties.tipo_energia + '<br>' +
+                            'Potencia neta mega Watts: ' + feature.properties.potencia_neta_mw + '</p></div>';
+
+              info.innerHTML = content;
+          });
+
+          // Clear the tooltip when map is clicked.
+          map.on('move', empty);
+
+          // Trigger empty contents when the script
+          // has loaded on the page.
+          empty();
+
+          function empty() {
+            info.innerHTML = '<div><strong>Click a marker</strong></div>';
+            }
+
 
           // every time the marker is dragged, update the coordinates container
           marker.on('dragend', ondragend);
@@ -98,58 +144,78 @@
           // Set the initial marker coordinate on load.
           ondragend();
 
-          function ondragend() {
+          async function ondragend() {
               var m = marker.getLatLng();
-              coordinates.innerHTML = 'Latitude: ' + m.lat + '<br />Longitude: ' + m.lng;
+
+              var ele = await getElevation(m.lng, m.lat)
+              coordinates.innerHTML = 'Latitude: ' + m.lat + '<br />Longitude: ' + m.lng + '<br />Elevacion: ' + ele + '<br />Velocidad (m/seg): ' + m.vel;
+
+
           }
-          var overlays = L.layerGroup().addTo(map);
 
-          // we create the 'layers' variable outside of the on('ready' callback
-          // so that it can be accessible in the showStations function. Otherwise,
-          // JavaScript scope would prevent you from accessing it.
-          var layers;
+          async function getElevation(lng, lat) {
+            var url = 'https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2/tilequery/' + lng + ',' + lat + '.json?layers=contour&limit=50&access_token=' + 'pk.eyJ1IjoiZnJhbmhvaGxiZXJnIiwiYSI6ImNraDRkZ21zMzAwOW0yenN6Ymp4bHR2aGQifQ.qI5VsvHPR_akHezVSgUFEA';
 
-          // Since featureLayer is an asynchronous method, we use the `.on('ready'`
-          // call to only use its marker data once we know it is actually loaded.
-          L.mapbox.featureLayer()
-              .loadURL('/mapbox.js/assets/data/stations.geojson')
-              .on('ready', function(e) {
-                  layers = e.target;
-                  showStations();
+
+            let data = await fetch(url, {
+              method: 'GET',
+              headers:{
+                'Content-Type': 'application/json'
+              }
+            }).then((response) => response.json())
+              .then(data => {
+                  return data;
               });
+              // Get all the returned features
+              var allFeatures = data.features;
+              //console.log(allFeatures);
+              // Create an empty array to add elevation data to
+              var elevations = [];
+              // For each returned feature, add elevation data to the elevations array
+              for (i = 0; i < allFeatures.length; i++) {
+                elevations.push(allFeatures[i].properties.ele);
+              }
+              //console.log(elevations);
+              // In the elevations array, find the largest value
+              var highestElevation = Math.min(...elevations);
+              elevation = highestElevation
+              console.log(elevation);
+              return elevation
+
+          };
+
 
           var filters = document.getElementById('colors').filters;
+          showStations();
+          function showStations(){
+            myLayer.setFilter(showState);
+          };
 
-          // There are many ways to filter data. Mapbox.js has the .setFilter method,
-          // but it only applies to L.mapbox.featureLayer layers, and that isn't what
-          // we're creating - we're making marker groups in a MarkerClusterGroup layer.
-          // Thus we distill filtering down to its essential part: an 'if' statement
-          // in a loop.
-          function showStations() {
-              // first collect all of the checked boxes and create an array of strings
-              // like ['green', 'blue']
-              var list = [];
-              for (var i = 0; i < filters.length; i++) {
-                  if (filters[i].checked) list.push(filters[i].value);
-              }
-              // then remove any previously-displayed marker groups
-              overlays.clearLayers();
-              // create a new marker group
-              var clusterGroup = new L.MarkerClusterGroup().addTo(overlays);
-              // and add any markers that fit the filtered criteria to that group.
-              layers.eachLayer(function(layer) {
-                  if (list.indexOf(layer.feature.properties.line) !== -1) {
-                      clusterGroup.addLayer(layer);
-                  }
-              });
+          function showState(feature) {
+
+            var list = [];
+            var boolean = false
+            for (var i = 0; i < filters.length; i++) {
+              //console.log(filters[i].value)
+                if (filters[i].checked) list.push(feature.properties.tipo_energia
+                    .indexOf(filters[i].value) !== -1 );
+                if (filters[i].checked) boolean = boolean || feature.properties.tipo_energia.indexOf(filters[i].value) !== -1;
+            }
+            return boolean;
+
           }
 
         </script>
-        </br>
-        </br>
-        </br>
-        </br>
+        <br>
+        <br>
+        <br>
+        <br>
       </div>
+
+      <br>
+      <br>
+      <br>
+      <br>
     </div>
   </section>
   </div>
