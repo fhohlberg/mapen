@@ -31,6 +31,7 @@ gem 'bcrypt', '~> 3.1.7'
 
 gem 'devise'
 
+gem 'autoprefixer-rails', '~> 10.0.1.3'
 
 gem 'geocoder'
 
