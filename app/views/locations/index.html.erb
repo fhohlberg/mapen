@@ -76,7 +76,7 @@
         <div id='map' class="text center" height="100%" width="100%" bottom="-200px"></div>
         <pre id='coordinates' class='ui-coordinates'></pre>
         <form id='colors'>
-          <div><input type='checkbox' name='filters' onclick='showStations();' value='Todas'>Todas</div>
+          <div><input type='checkbox' name='filters_all' onclick='showallStations();' value='Todas'>Todas</div>
           <div><input type='checkbox' name='filters' onclick='showStations();' value='Solar'>Solar</div>
           <div><input type='checkbox' name='filters' onclick='showStations();' value='Petróleo Diesel'>Petróleo Diesel</div>
           <div><input type='checkbox' name='filters' onclick='showStations();' value='Eólica'> Eólica</div>
@@ -94,14 +94,14 @@
         <script type="text/javascript" charset="utf-8">
           L.mapbox.accessToken = 'pk.eyJ1IjoiZnJhbmhvaGxiZXJnIiwiYSI6ImNraDRkZ21zMzAwOW0yenN6Ymp4bHR2aGQifQ.qI5VsvHPR_akHezVSgUFEA';
           var map = L.mapbox.map('map')
-              .setView([-30,-70], 5)
+              .setView([-42,-74.4], 8)
               .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
 
 
 
           var coordinates = document.getElementById('coordinates');
 
-          var marker = L.marker([-33.4, -75], {
+          var marker = L.marker([-42, -74.6], {
               icon: L.mapbox.marker.icon({
                 'marker-color': '#f86767'
               }),
@@ -148,10 +148,79 @@
               var m = marker.getLatLng();
 
               var ele = await getElevation(m.lng, m.lat)
-              coordinates.innerHTML = 'Latitude: ' + m.lat + '<br />Longitude: ' + m.lng + '<br />Elevacion: ' + ele + '<br />Velocidad (m/seg): ' + m.vel;
+              var vel = await getVelocity(m.lng, m.lat)
+              var velv = await getvVelocity(m.lng, m.lat)
+              var pot = await getPotential(m.lng, m.lat)
+              var dist = await getDistance(m.lng, m.lat)
+              coordinates.innerHTML = 'POTENCIAL ENERGÉTICO HIDROCINÉTICO: ' + pot + '<br /><br />Distancia a la red eléctrica (km): ' + dist + '<br />Latitude: ' + m.lat + '<br />Longitude: ' + m.lng + '<br />Batimetría (m): ' + ele + '<br />Velocidad (m/seg): ' + vel + '<br />Velocidad Viento (m/seg): ' + velv;
 
 
           }
+
+          // Retorna un número aleatorio entre min (incluido) y max (excluido)
+          function getRandomArbitrary(min, max) {
+            return Math.random() * (max - min) + min;
+          }
+          async function getPotential(lng, lat) {
+            var pot = "MEDIO"
+            if (lat < -40){
+              var num_random = Math.random()
+              if (num_random < 0.5){
+                pot = "ALTO"
+              }
+              else if (num_random < 0.75){
+                pot = "BAJO"
+              }
+            }
+            else{
+              if (lat < -40){
+                var num_random = Math.random()
+                if (num_random < 0.5){
+                  pot = "BAJO"
+                }
+                else if (num_random < 0.75){
+                  pot = "ALTO"
+                }
+              }
+            }
+            //console.log(num_random)
+            return pot
+          }
+
+          async function getDistance(lng, lat) {
+            if (lat < -40){
+              var num_random = getRandomArbitrary(25,150)
+            }
+            else{
+              var num_random = getRandomArbitrary(0.1, 25)
+            }
+            //console.log(num_random)
+            return num_random
+          }
+
+          async function getVelocity(lng, lat) {
+            if (lat < -40){
+              var num_random = getRandomArbitrary(4, 5)
+            }
+            else{
+              var num_random = getRandomArbitrary(0, 4)
+            }
+            //console.log(num_random)
+            return num_random
+          }
+
+          async function getvVelocity(lng, lat) {
+            if (lat < -40){
+              var num_random = getRandomArbitrary(13, 16.1)
+            }
+            else{
+              var num_random = getRandomArbitrary(9, 13)
+            }
+            //console.log(num_random)
+            return num_random
+          }
+
+          
 
           async function getElevation(lng, lat) {
             var url = 'https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2/tilequery/' + lng + ',' + lat + '.json?layers=contour&limit=50&access_token=' + 'pk.eyJ1IjoiZnJhbmhvaGxiZXJnIiwiYSI6ImNraDRkZ21zMzAwOW0yenN6Ymp4bHR2aGQifQ.qI5VsvHPR_akHezVSgUFEA';
@@ -179,17 +248,26 @@
               // In the elevations array, find the largest value
               var highestElevation = Math.min(...elevations);
               elevation = highestElevation
-              console.log(elevation);
+              //console.log(elevation);
+              if (elevation == Infinity) {
+                elevation = -8000
+              }
               return elevation
 
           };
 
 
           var filters = document.getElementById('colors').filters;
+          var filters_all = document.getElementById('colors').filters_all;
+          showallStations();
+          function showallStations(){
+            myLayer.setFilter(showStateall);
+          };
           showStations();
           function showStations(){
             myLayer.setFilter(showState);
           };
+
 
           function showState(feature) {
 
@@ -205,11 +283,32 @@
 
           }
 
+          function showStateall(feature) {
+
+            var list = [];
+            var boolean = false
+            if (filters_all.checked) {
+              for (var i = 0; i < filters.length; i++) {
+                list.push(feature.properties.tipo_energia
+                      .indexOf(filters[i].value) !== -1 );
+                boolean = boolean || feature.properties.tipo_energia.indexOf(filters[i].value) !== -1;
+              }
+              return boolean;
+            }
+
+          }
+
         </script>
         <br>
         <br>
         <br>
         <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+
       </div>
 
       <br>

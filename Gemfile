@@ -31,6 +31,7 @@ gem 'bcrypt', '~> 3.1.7'
 
 gem 'devise'
 
+
 gem 'geocoder'
 
 gem 'mapbox-gl-rails'

@@ -118,6 +118,13 @@
                             <li id="menu-item-1697" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1697"><a title="Page Image Alignment" href="/#fuentes_datos">Fuentes de Datos</a></li>
                           </ul>
                         </li>
+                        <% if !current_user %>
+                          <li id="menu-item-1636" class="menu-item menu-item-type-custom menu-item-object-custom current-menu-item current_page_item menu-item-home menu-item-1636 active"><a title="InicioSesion" href="/users/sign_in">Inicio Sesión</a></li>
+                        <% else %>
+                          <li class="nav-item cta">
+                            <%= link_to 'Cerrar Sesión', destroy_user_session_path,  :class => "nav-link", :method => :delete %></a>
+                          </li>
+                        <% end %>
                       </ul>
                     </div>
                   </div>
