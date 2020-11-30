@@ -5,10 +5,19 @@ class LocationsController < ApplicationController
   # GET /locations
   # GET /locations.json
   def index
+    
     @locations = Location.all
+    @conections = Conection.all
+    cont =  @locations.length()
+
     @geojson = Array.new
 
     @locations.each do |location|
+      if location.latitude
+        #puts location.address
+        cont -= 1
+      end
+
       info = {
         type: 'Feature',
         geometry: {
@@ -16,15 +25,34 @@ class LocationsController < ApplicationController
           coordinates: [location.longitude, location.latitude]
         },
         properties: {
-          name: location.comuna,
-          address: location.address,
-          potencia_neta_mw: location.potencia_neta_mw,
-          tipo_energia: location.tipo_energia,
+          sistema: location.sistema, 
+          subsistema: location.subsistema, 
+          propietario: location.propietario, 
+          rut: location.rut, 
+          nombre_central: location.nombre_central, 
+          estado: location.estado, 
+          fecha_puesta_servicio_central: location.fecha_puesta_servicio_central, 
+          address: location.address, 
+          clasificacion: location.clasificacion, 
+          tipo_energia: location.tipo_energia, 
+          potencia_bruta_mw: location.potencia_bruta_mw, 
+          potencia_neta_mw: location.potencia_neta_mw, 
+          medio_generacion: location.medio_generacion, 
+          distribuidora: location.distribuidora, 
+          punto_conexion: location.punto_conexion, 
+          combustible: location.combustible, 
+          consumo: location.consumo, 
+          unidad_consumo: location.unidad_consumo,
           :'marker-color' => '#00607d',
           :'marker-symbol' => 'circle',
           :'marker-size' => 'medium'
         }
       }
+      if location.sistema.nil?
+        info[:properties]['marker-size'] = 'small'
+        info[:properties]['marker-symbol'] = 'p'
+      end
+
       if location.tipo_energia == "Solar"
         info[:properties]['marker-color'] = '#fff947'
       elsif location.tipo_energia == "Petróleo Diesel"
@@ -46,6 +74,45 @@ class LocationsController < ApplicationController
       end
       @geojson << info
     end
+
+    cont2 = 0
+    cont3 = 0
+
+    @list_conections = Array.new
+    @conections.each do |con|
+      if !(@list_conections.include?(con.address))
+        @list_conections.push(con.address)
+        #puts "Agregando" + con.address + " a las conexiones"
+        info = {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [con.longitude, con.latitude]
+          },
+          properties: {
+            conection: "Conexion",
+            punto_conexion: con.punto_conexion, 
+            centrales: [con.nombre_central],
+            sistema: con.sistema, 
+            subsistema: con.subsistema, 
+            potencia_neta_mw_total: con.potencia_neta_mw.sub(",",".").to_f,
+            :'marker-color' => '#00607d',
+            :'marker-symbol' => 'circle',
+            :'marker-size' => 'large'
+          }
+        }
+        @geojson << info
+      else
+        @geojson.each do |inf| 
+          if inf[:properties][:punto_conexion] == con.punto_conexion && inf[:properties][:conection].present?
+            #puts "Agregando" + con.nombre_central + " a las conexion " + inf[:properties][:punto_conexion]
+            inf[:properties][:centrales].push(con.nombre_central)
+            inf[:properties][:potencia_neta_mw_total] += con.potencia_neta_mw.sub(",",".").to_f
+          end
+        end
+      end
+    end
+    
     respond_to do |format|
       format.html
       format.json { render json: @geojson }  # respond with the created JSON object

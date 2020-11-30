@@ -34,10 +34,33 @@
         padding:5px;
     }
 
+    #size {
+      position: absolute;
+      top: 0;
+      right: 40;
+      left: 40px;
+      background: #fff;
+      width: 150px;
+      padding:10px;
+    }
+    pre.ui-potential{
+      position:absolute;
+      bottom: -70px;
+      left: 730px;
+      weight: 100;
+      padding:5px 10px;
+      background:rgba(0,0,0,0);
+      color:#353130;
+      font-size:20px;
+      line-height:18px;
+      border-radius:3px;
+      text-align: center;
+    }
     pre.ui-coordinates {
       position:absolute;
-      bottom:-20px;
-      left:10px;
+      bottom: -100px;
+      left: 230px;
+      weight: 100;
       padding:5px 10px;
       background:rgba(0,0,0,0.5);
       color:#fff;
@@ -46,10 +69,18 @@
       border-radius:3px;
       }
       .info div {
-        background:#fff;
-        padding:10px;
+        position:absolute;
+        bottom: 150px;
+        left: 70px;
+        weight: 100;
+        padding:5px 10px;
+        background:rgba(0,0,0,0.5);
+        color:#fff;
+        font-size:12px;
+        line-height:18px;
         border-radius:3px;
-        }
+    }
+    
   </style>
   <section class="bg-secondary pb0">
     <div class="container text center">
@@ -58,7 +89,7 @@
           <div class="">
           <h3>EXPLORADOR MAPA</h3>
             <div class="mb32">
-            <p>En el siguiente mapa se muestran las distintas centrales de generación energética del país y los parámetros oceánicos necesarios para encontrar potencial energético por latitud y longitud.</p>
+            <p>En el siguiente mapa se muestran las principales y pequeñas centrales de generación energética del país, los puntos de conexión y los parámetros oceánicos necesarios para encontrar potencial energético por latitud y longitud.</p>
             </div>
           </div>
         </div>
@@ -75,7 +106,11 @@
 
         <div id='map' class="text center" height="100%" width="100%" bottom="-200px"></div>
         <pre id='coordinates' class='ui-coordinates'></pre>
+        <pre id='potential' class='ui-potential'></pre>
+        <p>* Para que el potencial aplique debes activar el filtro de Conexiones</p>
+
         <form id='colors'>
+          <div> TIPO DE ENERGÍA </div>
           <div><input type='checkbox' name='filters_all' onclick='showallStations();' value='Todas'>Todas</div>
           <div><input type='checkbox' name='filters' onclick='showStations();' value='Solar'>Solar</div>
           <div><input type='checkbox' name='filters' onclick='showStations();' value='Petróleo Diesel'>Petróleo Diesel</div>
@@ -88,8 +123,15 @@
           <div><input type='checkbox' name='filters' onclick='showStations();' value='Geotérmica'>Geotérmica</div>
         </form>
 
+        <form id='size'>
+          <div> TAMAÑO CENTRAL / CONEXIÓN</div>
+          <div><input type='checkbox' name='filters' onclick='showStationsSize();' value='Pequeñas'> Pequeñas</div>
+          <div><input type='checkbox' name='filters' onclick='showStationsSize();' value='Grandes'> Grandes</div>
+          <div><input type='checkbox' name='filters' onclick='showStationsSize();' value='Conexiones'> Conexiones</div>
 
+        </form>
         <div id='info' class='info'></div>
+        
 
         <script type="text/javascript" charset="utf-8">
           L.mapbox.accessToken = 'pk.eyJ1IjoiZnJhbmhvaGxiZXJnIiwiYSI6ImNraDRkZ21zMzAwOW0yenN6Ymp4bHR2aGQifQ.qI5VsvHPR_akHezVSgUFEA';
@@ -100,6 +142,8 @@
 
 
           var coordinates = document.getElementById('coordinates');
+          var potential = document.getElementById('potential');
+          
 
           var marker = L.marker([-42, -74.6], {
               icon: L.mapbox.marker.icon({
@@ -114,15 +158,48 @@
 
           myLayer.setGeoJSON(geojson);
 
+          console.log(geojson)
+
           myLayer.on('click',function(e) {
               // Force the popup closed.
               e.layer.closePopup();
 
               var feature = e.layer.feature;
-              var content = '<div><strong>' + feature.properties.address + '</strong>' +
-                            '<p>Tipo de enrgía: ' + feature.properties.tipo_energia + '<br>' +
-                            'Potencia neta mega Watts: ' + feature.properties.potencia_neta_mw + '</p></div>';
-
+              if (feature.properties.conection){
+                console.log(feature.properties)
+                var content = '<div><strong>' + feature.properties.punto_conexion + '</strong><br><br>' +
+                              '<u> Centrales:</u> ' + feature.properties.centrales + '<br>' +
+                              '<u> Sistema:</u> ' + feature.properties.sistema + '<br>' +
+                              '<u> Subsistema:</u> ' + feature.properties.subsistema + '<br><br>' +
+                              '<strong> Potenca neta total mega Watts:</strong> ' + feature.properties.potencia_neta_mw_total + '</p></div>'
+                   
+              }
+              else if (feature.properties.nombre_central) {
+                console.log("CENTRAL GRANDE")
+                var content = '<div><strong>' + feature.properties.address + '</strong><br><br>' +
+                            '<p><u> Tipo de enrgía:</u> ' + feature.properties.tipo_energia + '<br>' +
+                            '<u> Nombre Central:</u> ' + feature.properties.nombre_central + '<br>' + 
+                            '<u> Sistema:</u> ' + feature.properties.sistema + '<br>' +
+                            '<u> Subsistema:</u> ' + feature.properties.subsistema + '<br>' +
+                            '<u> Propietario:</u> ' + feature.properties.propietario+ '<br>' +
+                            '<u> Estado:</u> ' + feature.properties.estado+ '<br>' +
+                            '<u> Fecha puesta servicio:</u> ' + feature.properties.fecha_puesta_servicio_central + '<br>' +
+                            '<u> Clasificación:</u> ' + feature.properties.clasificacion + '<br>' +
+                            '<u> Medio de generación:</u> ' + feature.properties.medio_generacion + '<br>' +
+                            '<u> Distribuidora:</u> ' + feature.properties.distribuidora + '<br>' +
+                            '<u> Punto conexión:</u> ' + feature.properties.punto_conexion + '<br>' +
+                            '<u> Combustible:</u> ' + feature.properties.combustible + '<br>' +
+                            '<u> Consumo:</u> ' + feature.properties.consumo + ' ' + feature.properties.unidad_consumo +'<br><br>' +
+                            '<strong>Potencia buta mega Watts:</strong> ' + feature.properties.potencia_bruta_mw+ '<br>' +
+                            '<strong>Potencia neta mega Watts:</strong> ' + feature.properties.potencia_neta_mw + '</p></div>'
+                
+              }
+              else{
+                console.log("CENTRAL CHICA")
+                var content = '<div><strong>' + feature.properties.address + '</strong><br><br>' +
+                            '<p><u> Tipo de enrgía:</u> ' + feature.properties.tipo_energia + '<br><br>' +
+                             '<strong>Potencia neta mega Watts:</strong> ' + feature.properties.potencia_neta_mw + '</p></div>'
+              }
               info.innerHTML = content;
           });
 
@@ -150,10 +227,26 @@
               var ele = await getElevation(m.lng, m.lat)
               var vel = await getVelocity(m.lng, m.lat)
               var velv = await getvVelocity(m.lng, m.lat)
-              var pot = await getPotential(m.lng, m.lat)
-              var dist = await getDistance(m.lng, m.lat)
-              coordinates.innerHTML = 'POTENCIAL ENERGÉTICO HIDROCINÉTICO: ' + pot + '<br /><br />Distancia a la red eléctrica (km): ' + dist + '<br />Latitude: ' + m.lat + '<br />Longitude: ' + m.lng + '<br />Batimetría (m): ' + ele + '<br />Velocidad (m/seg): ' + vel + '<br />Velocidad Viento (m/seg): ' + velv;
+              
+              var nearest = {};
+              myLayer.eachLayer(function(layer) {
+                var distance = m.distanceTo(layer.getLatLng()) / 1000;
+                if (!nearest.marker) {
+                  nearest.marker = layer;
+                  nearest.distance = distance;
+                  nearest.punto = layer.feature.properties.punto_conexion;
+                  nearest.potencia_neta_mw_total = layer.feature.properties.potencia_neta_mw_total
+                } else if (distance < nearest.distance) {
+                  nearest.marker = layer;
+                  nearest.distance = distance;
+                  nearest.punto = layer.feature.properties.punto_conexion;
+                  nearest.potencia_neta_mw_total = layer.feature.properties.potencia_neta_mw_total;
+                }
+              });
+              var pot = await getPotential(m.lng, m.lat, nearest.distance, vel )
 
+              coordinates.innerHTML = 'Distancia a la red eléctrica (km): ' + nearest.distance + '<br />Punto conexión más cercano: ' + nearest.punto + '<br />Latitude: ' + m.lat + '<br />Longitude: ' + m.lng + '<br />Batimetría (m): ' + ele + '<br />Velocidad (m/seg): ' + vel + '<br />Velocidad Viento (m/seg): ' + velv;
+              potential.innerHTML = 'POTENCIAL ENERGÉTICO HIDROCINÉTICO: <br /> <strong>'+ pot + '</strong>'
 
           }
 
@@ -161,28 +254,22 @@
           function getRandomArbitrary(min, max) {
             return Math.random() * (max - min) + min;
           }
-          async function getPotential(lng, lat) {
-            var pot = "MEDIO"
-            if (lat < -40){
-              var num_random = Math.random()
-              if (num_random < 0.5){
+          async function getPotential(lng, lat, dis, vel) {
+            var pot = "BAJO"
+
+            if (lng < 74.3){
+              pot = "BAJO"
+            }
+            if (lat < -40 && dis > 100 && vel > 4.5){
                 pot = "ALTO"
-              }
-              else if (num_random < 0.75){
-                pot = "BAJO"
-              }
             }
-            else{
-              if (lat < -40){
-                var num_random = Math.random()
-                if (num_random < 0.5){
-                  pot = "BAJO"
-                }
-                else if (num_random < 0.75){
-                  pot = "ALTO"
-                }
+            else if (lat < -40 && dis < 100 && vel > 4.5) {
+                pot = "MEDIO"
               }
+            else if (lat > -40 && dis < 150 && vel > 3){
+              pot = "MEDIO"
             }
+            
             //console.log(num_random)
             return pot
           }
@@ -258,6 +345,7 @@
 
 
           var filters = document.getElementById('colors').filters;
+          var filters_size = document.getElementById('size').filters;
           var filters_all = document.getElementById('colors').filters_all;
           showallStations();
           function showallStations(){
@@ -267,6 +355,33 @@
           function showStations(){
             myLayer.setFilter(showState);
           };
+
+          showStationsSize();
+          function showStationsSize(){
+            myLayer.setFilter(showStateSize);
+          };
+
+          function showStateSize(feature) {
+
+            var list = [];
+            var boolean = false
+            for (var i = 0; i < filters_size.length; i++) {
+              if (filters_size[i].checked) {
+                if (filters_size[i].value == "Grandes") {
+                  boolean = boolean || (feature.properties.sistema !== null && feature.properties.conection == null);
+                }
+                else if (filters_size[i].value == "Pequeñas") {
+                  boolean = boolean || (feature.properties.sistema == null && feature.properties.conection == null);
+                }
+                else if (filters_size[i].value == "Conexiones") {
+                  boolean = boolean || feature.properties.conection != null;
+                }
+              }
+              
+            }
+            console.log(boolean);
+            return boolean;
+          }
 
 
           function showState(feature) {
@@ -301,16 +416,21 @@
         </script>
         <br>
         <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
 
       </div>
 
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
       <br>
       <br>
       <br>

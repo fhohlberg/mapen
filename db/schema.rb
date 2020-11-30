@@ -10,19 +10,59 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_11_26_141814) do
+ActiveRecord::Schema.define(version: 2020_11_29_184452) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "locations", force: :cascade do |t|
+  create_table "conections", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "sistema"
+    t.string "subsistema"
+    t.string "propietario"
+    t.string "rut"
+    t.string "nombre_central"
+    t.string "estado"
+    t.string "fecha_puesta_servicio_central"
+    t.string "clasificacion"
+    t.string "potencia_neta_mw"
+    t.string "potencia_bruta_mw"
+    t.string "distribuidora"
+    t.string "punto_conexion"
+    t.string "combustible"
+    t.string "consumo"
+    t.string "unidad_consumo"
     t.string "comuna"
     t.string "region"
     t.float "latitude"
     t.float "longitude"
     t.string "tipo_energia"
     t.string "medio_generacion"
-    t.float "potencia_neta_mw"
+  end
+
+  create_table "locations", force: :cascade do |t|
+    t.string "sistema"
+    t.string "subsistema"
+    t.string "propietario"
+    t.string "rut"
+    t.string "nombre_central"
+    t.string "estado"
+    t.string "fecha_puesta_servicio_central"
+    t.string "clasificacion"
+    t.string "potencia_neta_mw"
+    t.string "potencia_bruta_mw"
+    t.string "distribuidora"
+    t.string "punto_conexion"
+    t.string "combustible"
+    t.string "consumo"
+    t.string "unidad_consumo"
+    t.string "comuna"
+    t.string "region"
+    t.float "latitude"
+    t.float "longitude"
+    t.string "tipo_energia"
+    t.string "medio_generacion"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

@@ -5,8 +5,4 @@ class Location < ApplicationRecord
   def address
     [comuna, region, "Chile"].compact.join(', ')
   end
-
-  def coordinates
-    [longitude, latitude]
-  end
 end
